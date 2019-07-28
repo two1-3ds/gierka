@@ -215,7 +215,8 @@ function getCardNumericValue(card) {
     }
   }
 
-
+//TUTAJ JEST PRAWDOPODOBNIE BLAD - czym jest cardarray - nie dziala przez to program po wyczerpaniu decka. 
+//albo brakuje funkcji ktora obsluguje koniec gry kiedy jest jeden pusty deck (bo sie konczy nie raz po 21 rozdaniach
 function getScore(cardArray) {
     let score = 0;
     for (let i = 0; i < cardArray.length; i++) {
