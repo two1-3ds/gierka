@@ -12,9 +12,17 @@ let textArea = document.getElementById('text-area'),
     nextRound = document.getElementById('next-round');
     
 //Game variables
-let gameStarted = false,    
-    gameOver = false,
-    playerWon = false,
+let gameStarted = false;
+    checkButton.style.display = 'none';
+    results.style.display = 'none';
+    nextRound.style.display = 'none';
+    showStatus();
+
+//NEW GAME
+newGameButton.addEventListener('click', function(){
+    gameStarted = true;
+    gameOver = false;
+    playerWon = false; 
     computerCards = [],
     playerCards = [],
     computerScore = 0,
@@ -22,19 +30,6 @@ let gameStarted = false,
     deck=[];
     deck = createDeck();
     shuffleDeck(deck);
-    checkButton.style.display = 'none';
-    results.style.display = 'none';
-    nextRound.style.display = 'none';
-    showStatus();
-
-
-
-//NEW GAME
-newGameButton.addEventListener('click', function(){
-    gameStarted = true;
-    gameOver = false;
-    playerWon = false; 
-
     dealCards();
     computerCards = [ getNextCard() ];  
     playerCards =  [ getPlayerCard() ];
@@ -65,13 +60,14 @@ checkButton.addEventListener('click', function() {
 
 nextRound.addEventListener('click', function(){
 gameStarted = true;
+checkForEmptyDeck();
+checkButton.style.display = 'inline';
 computerCards = [ getNextCard() ];  
 playerCards =  [ getPlayerCard() ];
 newGameButton.style.display = 'none';
 results.style.display = 'none';
 nextRound.style.display = 'none';
 textArea.style.display = 'inline';
-checkButton.style.display = 'inline';
 showStatus();
 });
 
@@ -116,49 +112,45 @@ function shuffleDeck(deck) {
     }
   }
 
-  //WhoWins próba1 powiedzmy ze póki co zawsze ktoś wygrywa (else jeśli inaczej?)
-  //można zrobić case
-  //
-  //SDAOSDOASJDOIPASJDOIASJDOIJSAODIJASOIDJASOIDJAOSIDJAOSIDJAOSI
-  //TEAHDIASDHOASDHIUASDAISDHIASDHOASDHOASIDJOSAIDEJASOIE
-  
   
   let tempDeck = []; //tymczasowy array dla 2 wygranych kart
  
   function whoWins() {
     
     if (computerScore > playerScore) {
-      
-      tempDeck.push(computerCards);
-      tempDeck.push(playerCards);
-      computerDeck.push(tempDeck);
+      tempDeck = computerDeck.concat(playerCards,computerCards,drawDeck);
+      computerDeck = tempDeck;
       computerCards = [];
       playerCards = [];
+      drawDeck = [];
       playerWon = false;
-    
-      showResults(); }
+      showResults(); 
+    }
 
       else if (playerScore > computerScore ) {
-      tempDeck.push(computerCards);
-      tempDeck.push(playerCards);
-      playerDeck.push(tempDeck);
+      tempDeck = playerDeck.concat(computerCards,playerCards,drawDeck);
+      playerDeck = tempDeck;
       computerCards = [];
       playerCards = [];
+      drawDeck = [];
       playerWon = true;
       showResults();
       }
+
       else { isDraw();
       }
 
       }
     
-
+let drawDeck = []; //array na remis
   
 function isDraw() {
+  drawDeck = drawDeck.concat(computerCards,playerCards);
+  checkForEmptyDeck();
   computerCards = [ getNextCard() ];  
-  playerCards =  [ getPlayerCard() ];
-  tempDeck.push(computerCards);
-  tempDeck.push(playerCards);
+  playerCards = [ getPlayerCard() ];
+  drawDeck = drawDeck.concat(computerCards,playerCards);
+  checkForEmptyDeck();
   computerCards = [];
   playerCards = [];
   computerCards = [ getNextCard() ];  
@@ -215,8 +207,7 @@ function getCardNumericValue(card) {
     }
   }
 
-//TUTAJ JEST PRAWDOPODOBNIE BLAD - czym jest cardarray - nie dziala przez to program po wyczerpaniu decka. 
-//albo brakuje funkcji ktora obsluguje koniec gry kiedy jest jeden pusty deck (bo sie konczy nie raz po 21 rozdaniach
+
 function getScore(cardArray) {
     let score = 0;
     for (let i = 0; i < cardArray.length; i++) {
@@ -231,47 +222,7 @@ function getScore(cardArray) {
     playerScore = getScore(playerCards);
   }
 
-  /*
-  function checkForEndOfGame() {
-    
-TEGO PROSZE NIE CZYTAĆ BO TO JST TYPOWO ROBOCZO COŚ POKLEJONE Z 5 POMYSŁÓW
-OGARNĘ TO SOBIE JUTRO JAK ZROBIĆ endofgame handling
-
-    updateScores();
-
-    
-    if (gameOver) {
-      // draw ? tu trzeba dodać po dwie karty i wyrzucić poprzednie z arraya albo liczyć tylko ostatnią a wszystkie zrzucić do wygranego
-      while(computerScore == playerScore ) {
-        computerCards.push(getNextCard());
-        playerCards.push(getNextCard());
-        updateScores();
-      }
-    }
-    
-    if (playerScore > computerScore) {
-      playerWon = true;
-      gameOver = false; //sprecyzować co jest gameoverem
-     }
-    else if (computerScore > playerScore) {
-      //stworzyć tymczasowy array dla 2 wygranych kart
-      //przerzucić te karty przez function
-      computerDeck.push(nowy array)
-      computerCards.push(getNextCard());
-      playerWon = false;
-      gameOver = false; //to samo co wyżej
-    }
-    else if (gameOver) {
-      
-      if (playerScore > dealerScore) {
-        playerWon = true;
-      }
-      else {
-        playerWon = false;
-      }
-    }
-  }
-*/
+  
 
   function showStatus() {
     if (!gameStarted) {
@@ -288,28 +239,92 @@ OGARNĘ TO SOBIE JUTRO JAK ZROBIĆ endofgame handling
     for (let i=0; i < playerCards.length; i++) {
       playerCardString += getCardString(playerCards[i]) + '\n';
     }
+
+    let playerDeckString = '';
+    for (let i=0; i < playerDeck.length; i++) {
+      playerDeckString += getCardString(playerDeck[i]) + '\n';
+    }
+
+    let computerDeckString = '';
+    for (let i=0; i < computerDeck.length; i++) {
+      computerDeckString += getCardString(computerDeck[i]) + '\n';
+    }
+
+    let tempDeckString = '';
+    for (let i=0; i < tempDeck.length; i++) {
+      tempDeckString += getCardString(tempDeck[i]) + '\n';
+    }
+
+    let drawDeckString = '';
+    for (let i=0; i < drawDeck.length; i++) {
+      drawDeckString += getCardString(drawDeck[i]) + '\n';
+    }
+
     updateScores();
      
     textArea.innerText = 
       'Computer has:\n' +
-      computerCardString + 
+      computerCardString + '\n' +
+      computerDeckString + '\n' +
       '(score: '+ computerScore  + ')\n\n' +
       
       'Player has:\n' +
-      playerCardString +
-      '(score: '+ playerScore  + ')\n\n';
-
-        
+      playerCardString + '\n' +
+      playerDeckString + '\n' +
+      '(score: '+ playerScore  + ')\n\n' +
+      'Temp deck:' + '\n' + tempDeckString + '\n' +
+      'Draw deck:' + '\n' + drawDeckString ;
     }
+    
 
     function showResults() {
       if (!playerWon) {
-        results.innerText = "Computer win!";
+        results.innerText = "Computer won!";
         return;
       }
       else{
-        results.innerText = "Player win!";
+        results.innerText = "You win!";
         return;
       }
     }
   
+    function checkForEnd() {
+      if (gameOver && playerWon) {
+        newGameButton.style.display = 'inline';
+        results.style.display = 'inline';
+        nextRound.style.display = 'none';
+        textArea.style.display = 'none';
+        checkButton.style.display = 'none';
+        results.innerText = "GAME OVER - You win!";
+        return;
+      }
+
+      else if (gameOver && !playerWon) {
+        newGameButton.style.display = 'inline';
+        results.style.display = 'inline';
+        nextRound.style.display = 'none';
+        textArea.style.display = 'none';
+        checkButton.style.display = 'none';
+        results.innerText = "GAME OVER - Computer won!";
+        return;
+      }
+
+    }
+
+    
+  function checkForEmptyDeck() {
+    
+    if (playerDeck.length < 1) {
+      gameOver = true;
+      playerWon = false;
+      checkForEnd()
+    }
+    
+    else if (computerDeck.length < 1) {
+      playerWon = true;
+      gameOver = true;
+      checkForEnd()
+     }
+
+
+  }
